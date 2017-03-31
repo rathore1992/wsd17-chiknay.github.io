@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <script type="application/javascript">
+    </script>
+
+    {% if user.is_authenticated  == False %}
+        <div class="jumbotron">
+            <h1>Free Games Store</h1>
+            <p class="lead">Login to get access to our games and fun.</p>
+            <p class="lead">Register today for FREE!.</p>
+            <p><a class="btn btn-lg btn-success" href="/register" role="button">Register now</a></p>
+        </div>
+    {% endif %}
+
+     {% if user.is_authenticated and user.profile.is_developer == False %}
+    <div class="jumbotron">
+        <h1>Hello {{ user.username }}!</h1>
+        <br>
+        <p class="lead">This is your home page.</p>
+        <p class="lead">Game: Check new games!</p>
+        <p class="lead">Leaderboard: Games high scores.</p>
+        <p class="lead">MyGames: List of your games.</p>
+    </div>
+    {% endif %}
+
+    {% if user.is_authenticated and user.profile.is_developer %}
+        <div class="jumbotron">
+        <h1>Hello {{ user.username }}!</h1>
+        <br>
+        <p class="lead">This is your Developer home page.</p>
+        <p class="lead">The navbar on the top gives you access to different features of the website.</p>
+        <p class="lead">DevArea->Manage games: add games you develop.</p>
+        <p class="lead">DevArea->Inventory: take a look at your own sales statistics.</p>
+    </div>
+    {% endif %}
+
+
+    <script type="application/javascript">
+       $( "#navbar-Home" ).addClass('active');
+    </script>
+{% endblock %}

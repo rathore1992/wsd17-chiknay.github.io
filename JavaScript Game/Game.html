@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maze Game</title>
+    <style>
+        canvas {
+            background-color: #ff1a1a;
+        }
+    </style>
+</head>
+
+<body onload="Game_Starting()">
+<script>
+    //this is array in which obstacle on both sides will be initialized
+    var side_bars_obastacle = [];
+
+    var score = 0;
+    var myplayer;
+
+    /*setting up the game components such as canvas and calling update area
+     which will generate the obstacles and will run as time given in set interval*/
+    var setting_up_game = {
+        canvas: document.createElement("canvas"),
+        clear_game_area: function() {
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        },
+        set_up_canvas: function() {
+            this.canvas.width = 800;
+            this.canvas.height = 480;
+            this.interval = setInterval(updateGameArea, 20);
+            this.context = this.canvas.getContext("2d");
+            this.frame_number = 0;
+            document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+
+        },
+        //if player has collided with obstacles
+        crashed_stop: function() {
+            clearInterval(this.interval);
+        }
+
+    }
+    /*Initializing the components of game such as square score and obstacles*/
+    function Game_Starting() {
+        sendsetting();
+        setting_up_game.set_up_canvas();
+        //creating a box in canvas which will be our player
+        myplayer = new component(10, 10, "blue", 220, 230);
+        //creating the score
+        myScore = new component("25px", "Consolas", "black", 280, 40, "text");
+    }
+
+    function everyinterval(n) {
+        if ((setting_up_game.frame_number / n) % 1 == 0) {
+            return true;
+        }
+        return false;
+    }
+    //called when play again button is clicked
+    function reloadgame() {
+        setTimeout(function() {
+            location.reload()
+        }, 100);
+    }
+
+
+    /*update the playing areena by making the obstacles,checking if player has collided with obstacles
+     calculating at how much distance the obstacles will be formed and what will be difference between them
+     storing the core*/
+    function updateGameArea() {
+        setting_up_game.clear_game_area();
+        setting_up_game.frame_number += 1;
+        //defining the direction in which obstacles will move
+        for (i = 0; i < side_bars_obastacle.length; i += 1) {
+            side_bars_obastacle[i].y -= -1;
+            side_bars_obastacle[i].update();
+        }
+        score = setting_up_game.frame_number
+        myScore.text = "SCORE: " + score;
+        //after time in set interval obastacle will be formed
+        if (setting_up_game.frame_number == 1 || everyinterval(70)) {
+            var width,
+                height_of_screen = 50,
+                difference_in_obstacles,
+                height_of_screen_min,
+                height_of_screen_max = 300,
+                obstacles_min = 50,
+                obstacles_max = 120;
+            height_of_screen = Math.floor(Math.random() * (height_of_screen_max - height_of_screen + 1) + height_of_screen);
+            side_bars_obastacle.push(new component(height_of_screen, 10, "black", 0, 0)); //making the first obstacle
+            width = setting_up_game.canvas.width; //geting the canvas width
+            difference_in_obstacles = Math.floor(Math.random() * (obstacles_max - obstacles_min + 1) + obstacles_min); //difference in between the obstacles
+            side_bars_obastacle.push(new component(width - difference_in_obstacles - height_of_screen, 10, "black", height_of_screen + difference_in_obstacles, 0)); //making the second obstacle
+        }
+        //player postion updating
+        myplayer.postion_update();
+        myplayer.update();
+        //Check whether the box is collided with the obstacle or not if game over send score to service
+        for (i = 0; i < side_bars_obastacle.length; i += 1) {
+            if (myplayer.player_crash(side_bars_obastacle[i])) {
+                sendscore();
+                setting_up_game.crashed_stop();
+                return;
+            }
+        }
+        //score updating
+        myScore.update();
+    }
+    //moving the player left button click
+    function moveleft() {
+        myplayer.x -= 20;
+    }
+    //moving the player right by button click
+    function moveright() {
+        myplayer.x += 20;
+    }
+
+    function everyinterval(n) {
+        if ((setting_up_game.frame_number / n) % 1 == 0) {
+            return true;
+        }
+        return false;
+    }
+    function component(width, height, color, values_x, values_y, type) {
+        this.width = width;
+        this.height = height;
+        this.speed_across_x = 0;
+        this.speed_across_y = 0;
+        this.x = values_x;
+        this.y = values_y;
+        this.type = type;
+        //creating rectangle which is player in our game
+        this.update = function() {
+            if (this.type == "text") {
+                ctx.font = this.width + " " + this.height;
+                ctx.fillStyle = color;
+                ctx.fillText(this.text, this.x, this.y);
+            } else {
+                ctx = setting_up_game.context;
+                ctx.fillStyle = color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+        }
+        //if player crashes with some thing it will call
+        this.player_crash = function(otherobj) {
+            var right = this.x + (this.width);
+            var top = this.y;
+            var left = this.x;
+            var bottom = this.y + (this.height);
+            var left_value = otherobj.x;
+            var bottom_value = otherobj.y + (otherobj.height);
+            var right_value = otherobj.x + (otherobj.width);
+            var top_value = otherobj.y;
+            var crash = true;
+            if ((bottom < top_value) ||
+                (top > bottom_value) ||
+                (right < left_value) ||
+                (left > right_value)) {
+                crash = false;
+            }
+            return crash;
+        }
+        //to change the position of component
+        this.postion_update = function() {
+            this.x += this.speed_across_x;
+            this.y += this.speed_across_y;
+        }
+    }
+    //saving the game and sending score to service
+    function savegame() {
+        var msg = {
+
+            "messageType": "SAVE",
+
+            "gameState": {
+                "score": score
+            }
+
+        };
+
+        window.parent.postMessage(msg, "*");
+
+    }
+
+    function sendscore() {
+        var msg = {
+
+            "messageType": "SCORE",
+
+            "gameState": {
+                "score": score
+            }
+
+        };
+        window.parent.postMessage(msg, "*");
+    }
+
+    function loadgame() {
+        var msg = {
+
+            "messageType": "LOAD_REQUEST",
+        };
+        window.parent.postMessage(msg, "*");
+    }
+
+    function sendsetting() {
+        var msg = {
+
+            "messageType": "SETTING",
+            "options": {
+                "width": 700,
+                "height": 300
+            }
+        };
+        window.parent.postMessage(msg, "*");
+    }
+
+    window.addEventListener("message", function(evt) {
+        if (evt.data.messageType === "LOAD") {
+            score = evt.data.score;
+            myScore.update();
+        } else if (evt.data.messageType === "ERROR") {
+            alert(evt.data.info);
+        }
+    });
+
+    //creating buttons
+</script>
+<button onclick="moveleft()">LEFT</button>
+<button onclick="moveright()">RIGHT</button>
+<button onmousedown="reloadgame()" onmouseup="reloadgame()">Play Again</button>
+<button onmousedown="savegame()" onmouseup="savegame()">Save</button>
+<button onmousedown="loadgame()" onmouseup="loadgame()">Load</button>
+<button onmousedown="savegame()" onmouseup="savegame()">Submit</button>
+
+</body>
+
+</html>
+

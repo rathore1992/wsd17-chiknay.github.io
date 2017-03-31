@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <form method="post" action="#" class="form-login">
+            <h1 class="form-signin-heading" id="local-title">Welcome back!</h1>
+            {% csrf_token %}
+            <table class="spaced_table">
+               {{ form.as_table }}
+            </table>
+            <input type="submit" class="btn btn-lg btn-primary btn-block" value="Login" />
+            <a href="#" id="passwordReset">Forgot your password?</a>
+            <br/>
+            <br/>
+            <!-- Facebook login part here-->
+
+        </form>
+
+    </div>
+{% endblock %}
+
+{% block sidebar %}
+    <div id="sidebarContent">
+        <p class="lead">Login.</p>
+        <p>Login on our website.</p>
+        <br/>
+        <br/>
+        <p class="lead">Don't have an account?</p>
+        <a class="btn btn-lg btn-success" href="/register" role="button">Sign up</a>
+    </div>
+
+    <div id="status">
+    </div>
+
+{% endblock %}

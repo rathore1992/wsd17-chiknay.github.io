@@ -1,0 +1,49 @@
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+
+      <a class="navbar-brand" href="/">Chiknay-GameStore</a>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li id="navbar-Home"><a href="/">Home</a></li>
+        <li id="navbar-Store"><a href="#" >Games</a></li>
+        <li id="navbar-LeaderBoard"><a href="#" >Leaderboard</a></li>
+
+                {% if user.is_authenticated and user.profile.is_developer %}
+                <li class="dropdown" id="navbar-DevArea">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dev Area<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="Developer/games/">Manage games</a></li>
+                        <li id="navbar-Inventory"><a href="#">Inventory</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+              {% if user.is_authenticated and user.profile.is_player %}
+                <li id="navbar-MyGames"><a href="#">My Games</a></li>
+                {% endif %}
+
+                <li class="dropdown" id="navbar-Profile">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Account..<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                    {% if user.is_authenticated %}
+                        <li class="dropdown-header">{% if backends.associated|length > 0 %}fb {% endif %}<span class="glyphicon glyphicon-user"> </span> {{ user.username }}</li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#">Profile</a></li>
+                        {% if not user.profile.is_developer %}
+                        <li><a href="#">Cart</a></li>
+                        {% endif %}
+                        <li><a href="/logout">Logout</a></li>
+                    {% else %}
+                        <li><a href="/login">Login</a></li>
+                        <li><a href="/register">Registration</a></li>
+                    {% endif %}
+
+                    </ul>
+                <li id="navbar-Store"><a href="#" >About</a></li>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
